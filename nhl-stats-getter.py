@@ -1,6 +1,9 @@
+#! /usr/bin/env python
+
 import urllib2
 import sys
 import json
+import time
 from datetime import datetime
 
 class bcolors:
@@ -47,10 +50,10 @@ players_data = json.loads(html_data)["data"]
 
 output_file = open(DEFAULT_FILE_NAME, "w")
 
-print "Parsing data on " + str(len(players_data)) + " players"
-print "Loading out of " + DEFAULT_URL
-print "Writing to " + DEFAULT_FILE_NAME
-print "Pulling individual data from template: " + PLAYER_URL_PREFIX + "PLAYERID"
+print bcolors.HEADER + "Parsing data on " + str(len(players_data)) + " players" + bcolors.ENDC
+print bcolors.HEADER + "Loading out of " + DEFAULT_URL + bcolors.ENDC
+print bcolors.HEADER + "Writing to " + DEFAULT_FILE_NAME + bcolors.ENDC
+print bcolors.HEADER + "Pulling individual data from template: " + PLAYER_URL_PREFIX + "PLAYERID" + bcolors.ENDC
 
 for category in CATEGORIES:
 	output_file.write(category + ",")
@@ -58,12 +61,14 @@ for category in CATEGORIES:
 output_file.write("\n")
 
 for player in players_data:
+	time.sleep(0.5) # So we don't kill the league's website
+
 	player_page = urllib2.urlopen(PLAYER_URL_PREFIX + str(player["playerId"])).read()
 	miscellany = pull_miscellany(player_page)
 	
 	player["age"] = dob_to_age(miscellany["born"]).days/365.0
 	player["shoots"] = miscellany["shoots"][0]
-	player[""]
+	player["playerTeamsPlayedFor"] = player["playerTeamsPlayedFor"].replace(", ", "|")
 	
 	for category in CATEGORIES:
 		output_file.write(str(player[category])+",")
