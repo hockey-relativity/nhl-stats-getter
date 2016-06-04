@@ -75,8 +75,10 @@ for player in players_data:
 	for category in CATEGORIES:
 		if category in ("goals", "assists"):
 			output_file.write(str(player[category] * GOAL_INFLATOR).encode("utf-8") + ",")
-		else:
+		elif type(player[category]) in (int, float):
 			output_file.write(str(player[category]).encode("utf-8")+",")
+		else:
+			output_file.write(player[category].encode("utf-8")+",")
 
 	output_file.write("\n")
 
