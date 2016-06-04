@@ -16,8 +16,9 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-DEFAULT_URL = "http://www.nhl.com/stats/rest/grouped/skaters/season/skatersummary?cayenneExp=seasonId=20152016%20and%20gameTypeId=2"
-DEFAULT_FILE_NAME = "data.csv"
+GOAL_INFLATOR = 1
+DEFAULT_URL = "http://www.nhl.com/stats/rest/grouped/skaters/season/skatersummary?cayenneExp=seasonId=20142015%20and%20gameTypeId=2"
+DEFAULT_FILE_NAME = "data2014.csv"
 PLAYER_URL_PREFIX = "http://www.nhl.com/ice/player.htm?id="
 
 MISCELLANY_WANTED = ["Born", "Shoots"]
@@ -50,13 +51,14 @@ players_data = json.loads(html_data)["data"]
 
 output_file = open(DEFAULT_FILE_NAME, "w")
 
-print bcolors.HEADER + "Parsing data on " + str(len(players_data)) + " players" + bcolors.ENDC
-print bcolors.HEADER + "Loading out of " + DEFAULT_URL + bcolors.ENDC
-print bcolors.HEADER + "Writing to " + DEFAULT_FILE_NAME + bcolors.ENDC
-print bcolors.HEADER + "Pulling individual data from template: " + PLAYER_URL_PREFIX + "PLAYERID" + bcolors.ENDC
+print bcolors.OKBLUE + "Parsing data on " + str(len(players_data)) + " players" + bcolors.ENDC
+print bcolors.OKBLUE + "Loading out of " + DEFAULT_URL + bcolors.ENDC
+print bcolors.OKBLUE + "Writing to " + DEFAULT_FILE_NAME + bcolors.ENDC
+print bcolors.OKBLUE + "Pulling individual data from template: " + PLAYER_URL_PREFIX + "PLAYERID" + bcolors.ENDC
+print bcolors.OKBLUE + "Using goal inflator: " + str(GOAL_INFLATOR) + bcolors.ENDC
 
 for category in CATEGORIES:
-	output_file.write(category + ",")
+	output_file.write(category.encode("utf-8") + ",")
 
 output_file.write("\n")
 
@@ -71,7 +73,10 @@ for player in players_data:
 	player["playerTeamsPlayedFor"] = player["playerTeamsPlayedFor"].replace(", ", "|")
 	
 	for category in CATEGORIES:
-		output_file.write(str(player[category])+",")
+		if category in ("goals", "assists"):
+			output_file.write(str(player[category] * GOAL_INFLATOR).encode("utf-8") + ",")
+		else:
+			output_file.write(str(player[category]).encode("utf-8")+",")
 
 	output_file.write("\n")
 
